@@ -59,13 +59,15 @@ class SimpleEventQuerySet(EventQuerySet):
         qs._iterable_class = ByDayIterable
         return qs.filter(date__range=(fromDate - _2days, toDate + _2days))
 
-class SimpleEventPage(EventBase, Page):
+
+class AbstractSimpleEventPage(EventBase, Page):
     events = EventManager.from_queryset(SimpleEventQuerySet)()
 
     class Meta:
         verbose_name = _("event page")
         verbose_name_plural = _("event pages")
         default_manager_name = "objects"
+        abstract = True
 
     parent_page_types = ["joyous.CalendarPage",
                          "joyous.SpecificCalendarPage",
@@ -110,6 +112,12 @@ class SimpleEventPage(EventBase, Page):
         """
         return getLocalDatetime(self.date, self.time_to, self.tz)
 
+
+class SimpleEventPage(AbstractSimpleEventPage):
+    """
+    Concrete Single Event Page
+    """
+
 # ------------------------------------------------------------------------------
 class MultidayEventQuerySet(EventQuerySet):
     def current(self):
@@ -153,13 +161,14 @@ class MultidayEventPageForm(EventPageForm):
         elif startDate == endDate:
             super()._checkStartBeforeEnd(cleaned_data)
 
-class MultidayEventPage(EventBase, Page):
+class AbstractMultidayEventPage(EventBase, Page):
     events = EventManager.from_queryset(MultidayEventQuerySet)()
 
     class Meta:
         verbose_name = _("multiday event page")
         verbose_name_plural = _("multiday event pages")
         default_manager_name = "objects"
+        abstract = True
 
     parent_page_types = ["joyous.CalendarPage",
                          "joyous.SpecificCalendarPage",
@@ -205,6 +214,14 @@ class MultidayEventPage(EventBase, Page):
         Datetime that the event ends (in the local time zone).
         """
         return getLocalDatetime(self.date_to, self.time_to, self.tz)
+
+
+class MultidayEventPage(AbstractMultidayEventPage):
+    """
+    Concrete Multi-day Event Page
+    """
+
+
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------

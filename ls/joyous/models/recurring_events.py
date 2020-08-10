@@ -208,13 +208,14 @@ class RecurringEventPageForm(EventPageForm):
         if numDays == 1:
             super()._checkStartBeforeEnd(cleaned_data)
 
-class RecurringEventPage(EventBase, Page):
+class AbstractRecurringEventPage(EventBase, Page):
     events = EventWithHolidaysManager.from_queryset(RecurringEventQuerySet)()
 
     class Meta:
         verbose_name = _("recurring event page")
         verbose_name_plural = _("recurring event pages")
         default_manager_name = "objects"
+        abstract = True
 
     parent_page_types = ["joyous.CalendarPage",
                          "joyous.SpecificCalendarPage",
@@ -627,14 +628,26 @@ class RecurringEventPage(EventBase, Page):
         if last is not None:
             return getAwareDatetime(last, self.time_from, self.tz, dt.time.min)
 
+
+class RecurringEventPage(AbstractRecurringEventPage):
+    """
+    Concrete Recurring Event Page
+    """
+
+    class Meta:
+        verbose_name = _("recurring event page")
+        verbose_name_plural = _("recurring event pages")
+        default_manager_name = "objects"
+
 # ------------------------------------------------------------------------------
-class MultidayRecurringEventPage(ProxyPageMixin, RecurringEventPage):
+class MultidayRecurringEventPageMixin():
     """
     A proxy of RecurringEventPage that exposes the hidden num_days field.
     """
-    class Meta(ProxyPageMixin.Meta):
+    class Meta:
         verbose_name = _("multiday recurring event page")
         verbose_name_plural = _("multiday recurring event pages")
+        abstract=True
 
     subpage_types = ['joyous.ExtraInfoPage',
                      'joyous.CancellationPage',
@@ -645,6 +658,16 @@ class MultidayRecurringEventPage(ProxyPageMixin, RecurringEventPage):
     content_panels = RecurringEventPage.content_panels0 + [
         FieldPanel('num_days'),
         ] + RecurringEventPage.content_panels1
+
+
+class MultidayRecurringEventPage(ProxyPageMixin, MultidayRecurringEventPageMixin, RecurringEventPage):
+    """
+    Concrete Multiday Recurring Event Page
+    """
+
+    class Meta(ProxyPageMixin.Meta):
+        verbose_name = _("multiday recurring event page")
+        verbose_name_plural = _("multiday recurring event pages")
 
 # ------------------------------------------------------------------------------
 # EventException models

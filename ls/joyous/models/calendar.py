@@ -109,11 +109,12 @@ EVENTS_VIEW_CHOICES = [('L', _("List View")),
                        ('M', _("Monthly View"))]
 
 # ------------------------------------------------------------------------------
-class CalendarPage(RoutablePageMixin, Page):
-    """CalendarPage displays all the events which are in the same site."""
+class AbstractCalendarPage(models.Model):
+    """CalendarPage displays all the events which are in the same site. This mixin
+    allows for an easier method to extend the Calendar Page."""
+
     class Meta:
-        verbose_name = _("calendar page")
-        verbose_name_plural = _("calendar pages")
+        abstract = True
 
     EventsPerPage = getattr(settings, "JOYOUS_EVENTS_PER_PAGE", 25)
     holidays = Holidays()
@@ -491,16 +492,24 @@ class CalendarPage(RoutablePageMixin, Page):
             eventsPage = paginator.page(paginator.num_pages)
         return eventsPage
 
+
+class CalendarPage(AbstractCalendarPage, RoutablePageMixin, Page):
+    """
+    Concrete Model for Calendar Page
+    """
+
+    class Meta:
+        verbose_name = _("calendar page")
+        verbose_name_plural = _("calendar pages")
+
+
 # ------------------------------------------------------------------------------
-class SpecificCalendarPage(ProxyPageMixin, CalendarPage):
+class SpecificCalendarPageMixin():
     """
     SpecificCalendarPage displays only the events which are its children
     """
-    class Meta(ProxyPageMixin.Meta):
-        verbose_name = _("specific calendar page")
-        verbose_name_plural = _("specific calendar pages")
 
-    is_creatable  = False  # creation is disabled by default
+    is_creatable  = True  # creation is disabled by default
 
     @classmethod
     def _allowAnotherAt(cls, parent):
@@ -538,16 +547,26 @@ class SpecificCalendarPage(ProxyPageMixin, CalendarPage):
         """Return all my child events."""
         return getAllEvents(request, home=self, holidays=self.holidays)
 
+
+class SpecificCalendarPage(SpecificCalendarPageMixin, ProxyPageMixin, CalendarPage):
+    """
+    Concrete Proxy Model for Specific Calendar Page
+    """
+
+    class Meta(ProxyPageMixin.Meta):
+        verbose_name = _("specific calendar page")
+        verbose_name_plural = _("specific calendar pages")
+
+    is_creatable  = False  # creation is disabled by default
+
+
 # ------------------------------------------------------------------------------
-class GeneralCalendarPage(ProxyPageMixin, CalendarPage):
+class GeneralCalendarPageMixin():
     """
     GeneralCalendarPage displays all the events no matter where they are
     """
-    class Meta(ProxyPageMixin.Meta):
-        verbose_name = _("general calendar page")
-        verbose_name_plural = _("general calendar pages")
 
-    is_creatable  = False  # creation is disabled by default
+    is_creatable  = True  # creation is disabled by default
 
     @classmethod
     def _allowAnotherAt(cls, parent):
@@ -580,6 +599,18 @@ class GeneralCalendarPage(ProxyPageMixin, CalendarPage):
     def _getAllEvents(self, request):
         """Return all the events."""
         return getAllEvents(request, holidays=self.holidays)
+
+
+class GeneralCalendarPage(GeneralCalendarPageMixin, ProxyPageMixin, CalendarPage):
+    """
+    Concrete Proxy Model for General Calendar Page
+    """
+
+    class Meta(ProxyPageMixin.Meta):
+        verbose_name = _("general calendar page")
+        verbose_name_plural = _("general calendar pages")
+
+    is_creatable  = False  # creation is disabled by default
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------

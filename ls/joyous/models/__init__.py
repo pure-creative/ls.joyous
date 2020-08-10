@@ -9,6 +9,7 @@ from .one_off_events import SimpleEventPage
 from .one_off_events import MultidayEventPage
 
 # Recurring Events
+from .recurring_events import AbstractRecurringEventPage
 from .recurring_events import RecurringEventPage
 from .recurring_events import MultidayRecurringEventPage
 from .recurring_events import EventExceptionBase
