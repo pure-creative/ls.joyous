@@ -6,6 +6,9 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.template import loader
 from django.templatetags.static import static
+from ls.joyous.models.calendar import AbstractCalendarPage
+from ls.joyous.models.one_off_events import AbstractMultidayEventPage, AbstractSimpleEventPage
+
 from ..models import (CalendarPage, SimpleEventPage, MultidayEventPage,
         RecurringEventPage, ExtraInfoPage, CancellationBase, PostponementPage)
 from feedgen.feed import FeedGenerator
@@ -39,7 +42,7 @@ class CalendarFeed(FeedGenerator):
 
     @classmethod
     def fromPage(cls, page, request):
-        if isinstance(page, CalendarPage):
+        if isinstance(page, AbstractCalendarPage):
             return cls._fromCalendarPage(page, request)
         else:
             raise CalendarTypeError("Unsupported input page")
@@ -63,7 +66,7 @@ class CalendarFeed(FeedGenerator):
     @classmethod
     def _makeFromEvent(cls, thisEvent, request):
         page = thisEvent.page
-        if isinstance(page, (SimpleEventPage, MultidayEventPage,
+        if isinstance(page, (AbstractSimpleEventPage, AbstractMultidayEventPage,
                              RecurringEventPage, PostponementPage)):
             return EventEntry.fromEvent(thisEvent, request)
         elif isinstance(page, ExtraInfoPage):

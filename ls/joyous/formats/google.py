@@ -6,7 +6,10 @@ from collections import OrderedDict
 from urllib.parse import urlencode
 import pytz
 from icalendar import vPeriod
+from ls.joyous.models import AbstractRecurringEventPage
 from django.http import HttpResponseRedirect
+from ls.joyous.models.one_off_events import AbstractMultidayEventPage, AbstractSimpleEventPage
+
 from ..models import (SimpleEventPage, MultidayEventPage, RecurringEventPage,
         EventExceptionBase)
 from ..utils.telltime import getAwareDatetime
@@ -20,9 +23,9 @@ class GoogleCalendarHandler:
             return HttpResponseRedirect(gevent.url)
 
     def _makeFromPage(self, page):
-        if isinstance(page, SimpleEventPage):
+        if isinstance(page, AbstractSimpleEventPage):
             return SimpleGEvent.fromPage(page)
-        elif isinstance(page, MultidayEventPage):
+        elif isinstance(page, AbstractMultidayEventPage):
             return MultidayGEvent.fromPage(page)
         elif isinstance(page, RecurringEventPage):
             return RecurringGEvent.fromPage(page)

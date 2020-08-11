@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------
 import datetime as dt
 from django.dispatch import receiver
+from ls.joyous.models import AbstractRecurringEventPage
 from wagtail.admin.signals import init_new_page
 from .models import RecurringEventPage, EventExceptionBase
 
@@ -16,7 +17,7 @@ def identifyExpectantParent(sender, **kwargs):
     page = kwargs.get('page')
     parent = kwargs.get('parent')
     if (isinstance(page, EventExceptionBase) and
-        isinstance(parent, RecurringEventPage) and
+        isinstance(parent, AbstractRecurringEventPage) and
         not page.overrides):
         page._copyFieldsFromParent(parent)
 
