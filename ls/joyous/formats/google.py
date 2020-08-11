@@ -27,7 +27,7 @@ class GoogleCalendarHandler:
             return SimpleGEvent.fromPage(page)
         elif isinstance(page, AbstractMultidayEventPage):
             return MultidayGEvent.fromPage(page)
-        elif isinstance(page, RecurringEventPage):
+        elif isinstance(page, AbstractRecurringEventPage):
             return RecurringGEvent.fromPage(page)
         elif isinstance(page, EventExceptionBase):
             return RecurringGEvent.fromPage(page.overrides)

@@ -5,6 +5,7 @@ import datetime as dt
 from django.http import HttpResponse
 from django.conf import settings
 from django.template import loader
+from ls.joyous.models.recurring_events import AbstractRecurringEventPage
 from django.templatetags.static import static
 from ls.joyous.models.calendar import AbstractCalendarPage
 from ls.joyous.models.one_off_events import AbstractMultidayEventPage, AbstractSimpleEventPage
