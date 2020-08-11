@@ -194,7 +194,7 @@ class HiddenNumDaysPanel(FieldPanel):
 
     def _show(self):
         page = getattr(self, 'instance', None)
-        if isinstance(page, (MultidayRecurringEventPage,
+        if isinstance(page, (AbstractMultidayRecurringEventPage,
                              RescheduleMultidayEventPage)):
             retval = True
         else:
@@ -894,11 +894,12 @@ class ExtraInfoPageForm(DateExceptionPageForm):
         self._checkSlugAvailable(cleaned_data)
         return cleaned_data
 
-class ExtraInfoPage(DateExceptionBase, Page):
+class AbstractExtraInfoPage(DateExceptionBase, Page):
     class Meta:
         verbose_name = _("extra event information")
         verbose_name_plural = _("extra event information")
         default_manager_name = "objects"
+        abstract=True
 
     events = EventManager.from_queryset(ExtraInfoQuerySet)()
     parent_page_types = ["joyous.RecurringEventPage",
@@ -991,6 +992,14 @@ class ExtraInfoPage(DateExceptionBase, Page):
         fromDt = self._getFromDt()
         return fromDt if fromDt < timezone.localtime() else None
 
+
+
+class ExtraInfoPage(AbstractExtraInfoPage):
+    """
+    Concrete Extra Info Page model
+    """
+
+
 # ------------------------------------------------------------------------------
 class CancellationQuerySet(DateExceptionQuerySet):
     def this(self):
@@ -1047,11 +1056,12 @@ class CancellationBase(models.Model):
         """
         return _("This event has been cancelled.")
 
-class CancellationPage(CancellationBase, DateExceptionBase, Page):
+class AbstractCancellationPage(CancellationBase, DateExceptionBase, Page):
     class Meta:
         verbose_name = _("cancellation")
         verbose_name_plural = _("cancellations")
         default_manager_name = "objects"
+        abstract = True
 
     events = EventManager.from_queryset(CancellationQuerySet)()
     parent_page_types = ["joyous.RecurringEventPage",
@@ -1119,6 +1129,13 @@ class CancellationPage(CancellationBase, DateExceptionBase, Page):
         return url
 
     cancellation_url = property(getCancellationUrl)
+
+
+class CancellationPage(AbstractCancellationPage):
+    """
+    Concrete Cancellation Page Model
+    """
+
 
 # ------------------------------------------------------------------------------
 class PostponementQuerySet(EventQuerySet):
@@ -1202,11 +1219,13 @@ class RescheduleEventBase(EventBase):
     group_page  = None
     get_context = DateExceptionBase.get_context
 
-class PostponementPage(RoutablePageMixin, RescheduleEventBase, CancellationPage):
+
+class AbstractPostponementPage(RoutablePageMixin, RescheduleEventBase, CancellationPage):
     class Meta:
         verbose_name = _("postponement")
         verbose_name_plural = _("postponements")
         default_manager_name = "objects"
+        abstract = True
 
     events = EventManager.from_queryset(PostponementQuerySet)()
     parent_page_types = ["joyous.RecurringEventPage"]
@@ -1342,6 +1361,12 @@ class PostponementPage(RoutablePageMixin, RescheduleEventBase, CancellationPage)
             self.date = self.except_date + dt.timedelta(days=1)
         self.postponement_title = parent.title
 
+
+class PostponementPage(AbstractPostponementPage):
+    """
+    Concrete Postponement Page model
+    """
+
 # ------------------------------------------------------------------------------
 class RescheduleMultidayEventPage(ProxyPageMixin, PostponementPage):
     """
@@ -1436,11 +1461,12 @@ class ClosedForHolidaysPageForm(WagtailAdminPageForm):
         days = [initial.get(name, ClosedFor(name=name)) for name in chosen]
         self.instance.closed_for.set(days)
 
-class ClosedForHolidaysPage(CancellationBase, EventExceptionBase, Page):
+class AbstractClosedForHolidaysPage(CancellationBase, EventExceptionBase, Page):
     class Meta:
         verbose_name = _("closed for holidays")
         verbose_name_plural = _("closed for holidays")
         default_manager_name = "objects"
+        abstract = True
 
     events = EventWithHolidaysManager.from_queryset(ClosedForHolidaysQuerySet)()
     parent_page_types = ["joyous.RecurringEventPage"]
@@ -1690,6 +1716,12 @@ class ClosedForHolidaysPage(CancellationBase, EventExceptionBase, Page):
         if last is not None:
             return getAwareDatetime(last, self.time_from, self.tz, dt.time.min)
 
+
+class ClosedForHolidaysPage(AbstractClosedForHolidaysPage):
+    """
+    Concrete Closed For Holidays Page
+    """
+
 # ------------------------------------------------------------------------------
 class ExtCancellationQuerySet(EventQuerySet):
     def current(self):
@@ -1734,11 +1766,12 @@ class ExtCancellationPageForm(WagtailAdminPageForm):
             self.add_error('cancelled_from_date',
                            _("There is already an extended cancellation for then"))
 
-class ExtCancellationPage(CancellationBase, EventExceptionBase, Page):
+class AbstractExtCancellationPage(CancellationBase, EventExceptionBase, Page):
     class Meta:
         verbose_name = _("extended cancellation")
         verbose_name_plural = _("extended cancellations")
         default_manager_name = "objects"
+        abstract = True
 
     events = EventManager.from_queryset(ExtCancellationQuerySet)()
     parent_page_types = ["joyous.RecurringEventPage",
@@ -1926,6 +1959,13 @@ class ExtCancellationPage(CancellationBase, EventExceptionBase, Page):
         if occurence >= self.cancelled_from_date:
             return getAwareDatetime(occurence, self.time_from,
                                     self.tz, dt.time.min)
+
+
+class ExtCancellationPage(AbstractExtCancellationPage):
+    """
+    Concrete Ext Cancellation Page Model
+    """
+
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------

@@ -14,7 +14,11 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import HttpResponse
 from django.utils import html
 from django.utils import timezone
+from ls.joyous.models import AbstractRecurringEventPage
 from ls.joyous import __version__
+from ls.joyous.models.calendar import AbstractCalendarPage
+from ls.joyous.models.one_off_events import AbstractSimpleEventPage, AbstractMultidayEventPage
+
 from ..models import (SimpleEventPage, MultidayEventPage, RecurringEventPage,
         MultidayRecurringEventPage, EventExceptionBase, ExtraInfoPage,
         CancellationPage, PostponementPage, RescheduleMultidayEventPage,
@@ -116,7 +120,7 @@ class VCalendar(Calendar, VComponentMixin):
 
     @classmethod
     def fromPage(cls, page, request):
-        if isinstance(page, CalendarPage):
+        if isinstance(page, AbstractCalendarPage):
             return cls._fromCalendarPage(page, request)
         elif isinstance(page, EventBase):
             return cls._fromEventPage(page)
@@ -510,16 +514,16 @@ class VEventFactory:
             return SimpleVEvent.fromProps(props)
 
     def makeFromPage(self, page, calendar):
-        if isinstance(page, SimpleEventPage):
+        if isinstance(page, AbstractSimpleEventPage):
             return SimpleVEvent.fromPage(page)
 
-        elif isinstance(page, MultidayEventPage):
+        elif isinstance(page, AbstractMultidayEventPage):
             return MultidayVEvent.fromPage(page)
 
-        elif isinstance(page, MultidayRecurringEventPage):
+        elif isinstance(page, AbstractMultidayRecurringEventPage):
             return MultidayRecurringVEvent.fromPage(page, calendar)
 
-        elif isinstance(page, RecurringEventPage):
+        elif isinstance(page, AbstractRecurringEventPage):
             return RecurringVEvent.fromPage(page, calendar)
 
         elif isinstance(page, EventExceptionBase):

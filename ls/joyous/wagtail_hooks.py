@@ -5,6 +5,7 @@
 from django.templatetags.static import static
 from django.http import HttpResponse
 from django.utils.html import format_html
+from ls.joyous.models.calendar import AbstractCalendarPage
 from wagtail.core import hooks
 from wagtail.contrib.modeladmin.options import ModelAdmin
 from wagtail.contrib.modeladmin.options import modeladmin_register
@@ -27,7 +28,7 @@ def handlePageExport(page, request, serve_args, serve_kwargs):
 
 @hooks.register('before_edit_page')
 def stashRequest(request, page):
-    if isinstance(page, CalendarPage) and CalendarPageForm.importHandler:
+    if isinstance(page, AbstractCalendarPage) and CalendarPageForm.importHandler:
         page.__joyous_edit_request = request
     return None
 
