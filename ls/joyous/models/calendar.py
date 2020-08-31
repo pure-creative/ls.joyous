@@ -109,15 +109,23 @@ EVENTS_VIEW_CHOICES = [('L', _("List View")),
                        ('M', _("Monthly View"))]
 
 # ------------------------------------------------------------------------------
-class AbstractCalendarPage(models.Model):
+class AbstractCalendarPage(Page):
     """CalendarPage displays all the events which are in the same site. This mixin
     allows for an easier method to extend the Calendar Page."""
 
     class Meta:
         abstract = True
 
-    EventsPerPage = getattr(settings, "JOYOUS_EVENTS_PER_PAGE", 25)
     holidays = Holidays()
+    EventsPerPage = getattr(settings, "JOYOUS_EVENTS_PER_PAGE", 25)
+
+    calendar_list_upcoming_template = "joyous/calendar_list_upcoming.html"
+    calendar_month_template = "joyous/calendar_month.html"
+    calendar_week_template = "joyous/calendar_week.html"
+    calendar_list_day_template = "joyous/calendar_list_day.html"
+    calendar_list_past_template = "joyous/calendar_list_past.html"
+    calendar_minicalendar_template = "joyous/includes/minicalendar.html"
+
     subpage_types = ['joyous.SimpleEventPage',
                      'joyous.MultidayEventPage',
                      'joyous.RecurringEventPage',
@@ -216,7 +224,7 @@ class AbstractCalendarPage(models.Model):
                     'events':       self._getEventsByWeek(request, year, month)})
         cxt.update(self._getExtraContext("month"))
         return TemplateResponse(request,
-                                "joyous/calendar_month.html",
+                                self.calendar_month_template,
                                 cxt)
 
     @route(r"^week/$")
@@ -284,7 +292,7 @@ class AbstractCalendarPage(models.Model):
                     'events':       [eventsInWeek]})
         cxt.update(self._getExtraContext("week"))
         return TemplateResponse(request,
-                                "joyous/calendar_week.html",
+                                self.calendar_week_template,
                                 cxt)
 
     @route(r"^day/$")
@@ -330,7 +338,7 @@ class AbstractCalendarPage(models.Model):
                     'events':       eventsPage})
         cxt.update(self._getExtraContext("day"))
         return TemplateResponse(request,
-                                "joyous/calendar_list_day.html",
+                                self.calendar_list_day_template,
                                 cxt)
 
     @route(r"^upcoming/$")
@@ -354,7 +362,7 @@ class AbstractCalendarPage(models.Model):
                     'events':       eventsPage})
         cxt.update(self._getExtraContext("upcoming"))
         return TemplateResponse(request,
-                                "joyous/calendar_list_upcoming.html",
+                                self.calendar_list_upcoming_template,
                                 cxt)
 
     @route(r"^past/$")
@@ -378,7 +386,7 @@ class AbstractCalendarPage(models.Model):
                     'events':       eventsPage})
         cxt.update(self._getExtraContext("past"))
         return TemplateResponse(request,
-                                "joyous/calendar_list_past.html",
+                                self.calendar_list_past_template,
                                 cxt)
 
     @route(r"^mini/{YYYY}/{MM}/$".format(**DatePictures))
@@ -402,7 +410,7 @@ class AbstractCalendarPage(models.Model):
                     'events':       self._getEventsByWeek(request, year, month)})
         cxt.update(self._getExtraContext("mini"))
         return TemplateResponse(request,
-                                "joyous/includes/minicalendar.html",
+                                self.calendar_list_mini_template,
                                 cxt)
 
     @classmethod
@@ -493,7 +501,7 @@ class AbstractCalendarPage(models.Model):
         return eventsPage
 
 
-class CalendarPage(AbstractCalendarPage, RoutablePageMixin, Page):
+class CalendarPage(AbstractCalendarPage):
     """
     Concrete Model for Calendar Page
     """
