@@ -194,7 +194,7 @@ class HiddenNumDaysPanel(FieldPanel):
 
     def _show(self):
         page = getattr(self, 'instance', None)
-        if isinstance(page, (AbstractMultidayRecurringEventPage,
+        if isinstance(page, (MultidayRecurringEventPage,
                              RescheduleMultidayEventPage)):
             retval = True
         else:
@@ -234,7 +234,7 @@ class AbstractRecurringEventPage(EventBase, Page):
                                    validators=[MinValueValidator(1),
                                                MaxValueValidator(99)])
 
-    content_panels0 = Page.content_panels + [
+    content_panels0 = [
         FieldPanel('category'),
         ImageChooserPanel('image'),
         FieldPanel('repeat')]
@@ -243,7 +243,8 @@ class AbstractRecurringEventPage(EventBase, Page):
         TimePanel('time_to'),
         FieldPanel('tz'),
         ] + EventBase.content_panels1
-    content_panels = content_panels0 + [HiddenNumDaysPanel()] + content_panels1
+    content_panels = Page.content_panels + content_panels0 + \
+                     [HiddenNumDaysPanel()] + content_panels1
 
     def __init__(self, *args, **kwargs):
         self.holidays = kwargs.pop("holidays", None)
