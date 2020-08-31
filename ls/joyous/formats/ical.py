@@ -520,7 +520,7 @@ class VEventFactory:
         elif isinstance(page, AbstractMultidayEventPage):
             return MultidayVEvent.fromPage(page)
 
-        elif isinstance(page, AbstractMultidayRecurringEventPage):
+        elif isinstance(page, MultidayRecurringEventPage):
             return MultidayRecurringVEvent.fromPage(page, calendar)
 
         elif isinstance(page, AbstractRecurringEventPage):
